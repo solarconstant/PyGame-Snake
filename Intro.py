@@ -32,6 +32,41 @@ smallfont = pygame.font.SysFont('helvetica', 25)
 medfont = pygame.font.SysFont('helvetica', 50)
 largefont = pygame.font.SysFont('helvetica', 80)
 
+def message_to_screen(msg, color, y_displace = 0, size = 'small'):
+	textSurf, textRect = text_objects(msg, color, size)
+	textRect.center = (display_width/2), (display_height/2)+y_displace
+	gameDisplay.blit(textSurf, textRect)
+
+def pause():
+	paused = True
+	gameDisplay.fill((255, 255, 255))
+	message_to_screen('Paused',
+						(0, 0, 0),
+						-100,
+						size = 'large')
+	message_to_screen('Press C to continue or Q to quit',
+						(0, 0, 0),
+						25)
+	pygame.display.update()
+	clock.tick(10)
+
+	while paused:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				quit()
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_c:
+					paused = False
+				elif event.key == pygame.K_q:
+					pygame.quit()
+					quit()
+	
+
+def score(score):
+	text = smallfont.render("Score: "+str(score), True, (0, 0, 0))
+	gameDisplay.blit(text, [0,0])
+
 def game_intro():
 	intro = True
 	while intro:
@@ -95,13 +130,16 @@ def text_objects(text, color, size):
 	return textSurf, textSurf.get_rect()
 
 
-def message_to_screen(msg, color, y_displace = 0, size = 'small'):
-	textSurf, textRect = text_objects(msg, color, size)
-	textRect.center = (display_width/2), (display_height/2)+y_displace
-	gameDisplay.blit(textSurf, textRect)	
+	
 
 	# screen_text = font.render(msg, True, color)
 	# gameDisplay.blit(screen_text, [int(display_width/2), int(display_height/2)])
+
+def apple_generator():
+	position_apple_X = round(random.randrange(0, display_width - block_size)/10.0)*10.0
+	position_apple_Y = round(random.randrange(0, display_height - block_size)/10.0)*10.0
+
+	return position_apple_X, position_apple_Y
 
 def gameloop():
 	global direction
@@ -113,9 +151,9 @@ def gameloop():
 	lead_x = int(display_width/2)
 	lead_y = int(display_height/2)
 	lead_y_change = 0
-	position_apple_X = round(random.randrange(0, display_width - block_size)/10.0)*10.0
-	position_apple_Y = round(random.randrange(0, display_height - block_size)/10.0)*10.0
 	
+	position_apple_X, position_apple_Y = apple_generator()
+
 	while not gameExit:
 		while gameOver == True:
 			gameDisplay.fill(color)
@@ -151,12 +189,15 @@ def gameloop():
 					lead_y_change = 10
 					lead_x_change = 0
 					direction = 'down'	
+				if event.key == pygame.K_p:
+					pause()
 		if lead_x < 0 or lead_x >= display_width or lead_y < 0 or lead_y >= display_height:
 			gameOver = True
 		lead_x += lead_x_change
 		lead_y += lead_y_change
 		gameDisplay.fill(color)
 		#pygame.draw.rect(gameDisplay, (0, 255, 0), [position_apple_X, position_apple_Y, block_size, block_size])
+
 		gameDisplay.blit(samosa, (position_apple_X, position_apple_Y))
 		snake_head = []
 		snake_head.append(lead_x)
@@ -170,6 +211,8 @@ def gameloop():
 		for each_segment in snake_list[:-1]:
 			if each_segment == snake_head:
 				gameOver = True
+		
+		score(snake_length - 1)
 		pygame.display.update()
 
 		# if (lead_x >= position_apple_X and lead_x <= position_apple_X + block_size):
@@ -181,8 +224,7 @@ def gameloop():
 		if lead_x >= position_apple_X and lead_x <= position_apple_X + block_size or lead_x + block_size >= position_apple_X and lead_x + block_size <= position_apple_X + block_size:
 			if lead_y >= position_apple_Y and lead_y <= position_apple_Y + block_size or lead_y + block_size >= position_apple_Y and lead_y + block_size <= position_apple_Y + block_size:
 				snake_length += 3
-				position_apple_X = round(random.randrange(0, display_width - block_size))
-				position_apple_Y = round(random.randrange(0, display_height - block_size))
+				position_apple_X, position_apple_Y = apple_generator()
 		clock.tick(FPS)
 	pygame.quit()
 	quit()
