@@ -39,7 +39,7 @@ def message_to_screen(msg, color, y_displace = 0, size = 'small'):
 
 def pause():
 	paused = True
-	gameDisplay.fill((255, 255, 255))
+	#gameDisplay.fill((255, 255, 255))
 	message_to_screen('Paused',
 						(0, 0, 0),
 						-100,
@@ -155,12 +155,12 @@ def gameloop():
 	position_apple_X, position_apple_Y = apple_generator()
 
 	while not gameExit:
-		while gameOver == True:
-			gameDisplay.fill(color)
+		if gameOver == True:
 			message_to_screen("Game Over!", (255, 210, 70), -50, size = 'large')
 			message_to_screen("Press C to play again or Q to quit", (0, 255, 0), 50, size = 'medium')
 			pygame.display.update()
 
+		while gameOver == True:
 			for event in pygame.event.get():
 				if event.type == pygame.KEYDOWN:
 					if event.key == pygame.K_q:
